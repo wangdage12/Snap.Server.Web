@@ -1,0 +1,99 @@
+/* src/styles/index.scss */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+// CSS 变量定义 - 亮色模式
+:root {
+  --bg-color: #f5f7fa;
+  --text-color: #303133;
+  --border-color: #e4e7ed;
+  --header-bg: #fff;
+  --aside-bg: #304156;
+  --aside-text: #bfcbd9;
+  --aside-hover: #263445;
+  --aside-active: #409eff;
+  --main-bg: #f5f7fa;
+}
+
+// CSS 变量定义 - 暗色模式
+html.dark {
+  --bg-color: #1a1a1a;
+  --text-color: #e4e7ed;
+  --border-color: #4c4d4f;
+  --header-bg: #2b2b2b;
+  --aside-bg: #1f1f1f;
+  --aside-text: #a8abb2;
+  --aside-hover: #363636;
+  --aside-active: #409eff;
+  --main-bg: #141414;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, 'Helvetica Neue', Arial;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+// 暗黑模式下的全局样式调整
+html.dark {
+  .el-header {
+    background-color: var(--header-bg) !important;
+    border-bottom-color: var(--border-color) !important;
+  }
+  
+  .el-main {
+    background-color: var(--main-bg) !important;
+  }
+  
+  .el-aside {
+    background-color: var(--aside-bg) !important;
+  }
+  
+  .el-menu {
+    background-color: var(--aside-bg) !important;
+    
+    .el-menu-item {
+      color: var(--aside-text) !important;
+      background-color: var(--aside-bg) !important;
+      
+      &:hover {
+        background-color: var(--aside-hover) !important;
+        color: #fff !important;
+      }
+      
+      &.is-active {
+        background-color: var(--aside-active) !important;
+        color: #fff !important;
+      }
+    }
+    
+    .el-sub-menu__title {
+      color: var(--aside-text) !important;
+      background-color: var(--aside-bg) !important;
+      
+      &:hover {
+        background-color: var(--aside-hover) !important;
+        color: #fff !important;
+      }
+    }
+  }
+  
+  .toggle-btn {
+    color: var(--text-color) !important;
+    
+    &:hover {
+      color: var(--aside-active) !important;
+    }
+  }
+}
