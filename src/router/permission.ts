@@ -1,7 +1,7 @@
 import router from './index'
 import { useUserStore } from '@/stores/user'
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, _ , next) => {
   const userStore = useUserStore()
 
   // 未登录
