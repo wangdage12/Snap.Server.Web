@@ -19,7 +19,7 @@ const routes = [
       },
       {
         path: 'user',
-        component: () => import('@/views/dashboard/index.vue'),
+        component: () => import('@/views/user/index.vue'),
         meta: { title: '用户管理', icon: 'User' },
       },
       {
@@ -35,6 +35,11 @@ const routes = [
             path: 'role',
             component: () => import('@/views/dashboard/index.vue'),
             meta: { title: '角色管理', icon: 'UserFilled' },
+          },
+          {
+            path: 'announcement',
+            component: () => import('@/views/announcement/index.vue'),
+            meta: { title: '公告管理', icon: 'Bell' },
           },
         ],
       },
