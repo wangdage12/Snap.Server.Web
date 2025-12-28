@@ -12,13 +12,13 @@
         <span>{{ item.meta?.title }}</span>
       </template>
 
-      <SidebarItem :routes="item.children!" />
+      <SidebarItem :routes="item.children!" :parent-path="item.path" />
     </el-sub-menu>
 
     <!-- 普通菜单 -->
     <el-menu-item
       v-else
-      :index="item.path"
+      :index="getFullPath(item)"
     >
       <el-icon v-if="item.meta?.icon">
         <component :is="icons[item.meta.icon as keyof typeof icons]" />
@@ -32,10 +32,24 @@
 import type { RouteRecordRaw } from 'vue-router'
 import * as icons from '@element-plus/icons-vue'
 
-defineProps<{
+interface Props {
   routes: RouteRecordRaw[]
-}>()
+  parentPath?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  parentPath: ''
+})
 
 const hasChildren = (route: RouteRecordRaw) =>
   route.children && route.children.length > 0
+
+const getFullPath = (route: RouteRecordRaw) => {
+  // 如果是绝对路径，直接返回
+  if (route.path.startsWith('/')) {
+    return route.path
+  }
+  // 否则拼接父级路径
+  return props.parentPath ? `/${props.parentPath}/${route.path}` : `/${route.path}`
+}
 </script>

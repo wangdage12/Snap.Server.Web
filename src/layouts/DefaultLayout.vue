@@ -34,6 +34,20 @@
               @change="themeStore.toggleTheme"
             />
           </div>
+          
+          <el-dropdown class="user-dropdown" @command="handleCommand">
+            <span class="user-info">
+              <el-avatar :size="32" :icon="UserFilled" />
+              <span class="username">{{ userStore.userInfo?.UserName || '用户' }}</span>
+              <el-icon class="el-icon--right"><arrow-down /></el-icon>
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="profile">个人中心</el-dropdown-item>
+                <el-dropdown-item divided command="logout">退出登录</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </div>
       </el-header>
 
@@ -47,14 +61,31 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Fold, Expand, Moon, Sunny } from '@element-plus/icons-vue'
+import { Fold, Expand, Moon, Sunny, UserFilled, ArrowDown } from '@element-plus/icons-vue'
 import SidebarItem from '../components/SidebarItem.vue'
 import { useThemeStore } from '../stores/theme'
+import { useUserStore } from '../stores/user'
 
 const isCollapse = ref(false)
 const route = useRoute()
 const router = useRouter()
 const themeStore = useThemeStore()
+const userStore = useUserStore()
+
+// 处理下拉菜单命令
+const handleCommand = (command: string) => {
+  switch (command) {
+    case 'profile':
+      // 跳转到个人中心
+      router.push('/profile')
+      break
+    case 'logout':
+      // 退出登录
+      userStore.logout()
+      router.push('/login')
+      break
+  }
+}
 
 const toggle = () => (isCollapse.value = !isCollapse.value)
 
@@ -170,5 +201,20 @@ const menuRoutes = computed(() => {
 .main {
   background-color: var(--main-bg);
   padding: 20px;
+}
+
+.user-dropdown {
+  margin-left: 20px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--text-color);
+}
+
+.username {
+  margin: 0 8px;
 }
 </style>
