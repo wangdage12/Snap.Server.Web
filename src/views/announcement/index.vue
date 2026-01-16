@@ -28,6 +28,14 @@
           </el-tag>
         </template>
       </el-table-column>
+      <el-table-column prop="Distribution" label="发行版" width="120">
+        <template #default="{ row }">
+          <el-tag v-if="row.Distribution" size="small" type="info">
+            {{ row.Distribution }}
+          </el-tag>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="Link" label="链接" width="200">
         <template #default="{ row }">
           <el-link
@@ -175,6 +183,13 @@
         placeholder="可选，最大显示版本号"
       />
     </el-form-item>
+    
+    <el-form-item label="发行版名称">
+      <el-input
+        v-model="createForm.Distribution"
+        placeholder="可选，用于区分不同发行版，默认为空表示所有发行版"
+      />
+    </el-form-item>
   </el-form>
   
   <template #footer>
@@ -252,6 +267,13 @@
         placeholder="可选，最大显示版本号"
       />
     </el-form-item>
+    
+    <el-form-item label="发行版名称">
+      <el-input
+        v-model="editForm.Distribution"
+        placeholder="可选，用于区分不同发行版，默认为空表示所有发行版"
+      />
+    </el-form-item>
   </el-form>
   
   <template #footer>
@@ -300,6 +322,7 @@ const createForm = reactive<CreateAnnouncementRequest>({
   Locale: '',
   MaxPresentVersion: '',
   Severity: 0,
+  Distribution: '',
 })
 
 const editForm = reactive<CreateAnnouncementRequest>({
@@ -309,6 +332,7 @@ const editForm = reactive<CreateAnnouncementRequest>({
   Locale: '',
   MaxPresentVersion: '',
   Severity: 0,
+  Distribution: '',
 })
 
 const createRules: FormRules = {
@@ -377,6 +401,7 @@ const handleCreate = () => {
     Locale: '',
     MaxPresentVersion: '',
     Severity: 0,
+    Distribution: '',
   })
   createDialogVisible.value = true
 }
@@ -417,6 +442,7 @@ const handleEdit = (announcement: Announcement) => {
     Locale: announcement.Locale || '',
     MaxPresentVersion: announcement.MaxPresentVersion || '',
     Severity: announcement.Severity,
+    Distribution: announcement.Distribution || '',
   })
   editDialogVisible.value = true
 }

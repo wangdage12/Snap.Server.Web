@@ -10,6 +10,7 @@ export interface Announcement {
   MaxPresentVersion: string | null
   Severity: number
   Title: string
+  Distribution: string | null
 }
 
 /** 公告列表响应数据类型 */
@@ -38,6 +39,7 @@ export interface CreateAnnouncementRequest {
   Locale?: string | null
   MaxPresentVersion?: string | null
   Severity?: number | null
+  Distribution?: string | null
 }
 
 /** 创建公告响应数据类型 */
