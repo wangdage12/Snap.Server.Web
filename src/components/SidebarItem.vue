@@ -3,7 +3,7 @@
     <!-- 有子路由 -->
     <el-sub-menu
       v-if="hasChildren(item)"
-      :index="item.path"
+      :index="getFullPath(item)"
     >
       <template #title>
         <el-icon v-if="item.meta?.icon">
@@ -12,7 +12,7 @@
         <span>{{ item.meta?.title }}</span>
       </template>
 
-      <SidebarItem :routes="item.children!" :parent-path="item.path" />
+      <SidebarItem :routes="item.children!" :parent-path="getFullPath(item)" />
     </el-sub-menu>
 
     <!-- 普通菜单 -->
@@ -38,7 +38,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  parentPath: ''
+  parentPath: '/dashboard'
 })
 
 const hasChildren = (route: RouteRecordRaw) =>
@@ -50,6 +50,7 @@ const getFullPath = (route: RouteRecordRaw) => {
     return route.path
   }
   // 否则拼接父级路径
-  return props.parentPath ? `/${props.parentPath}/${route.path}` : `/${route.path}`
+  const basePath = props.parentPath || ''
+  return basePath ? `${basePath}/${route.path}` : `/${route.path}`
 }
 </script>

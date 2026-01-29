@@ -101,7 +101,7 @@ const handleLogin = async () => {
       await userStore.fetchUserInfo()
 
       ElMessage.success('登录成功')
-      router.push({ path: '/' })
+      router.push({ path: '/dashboard' })
     } catch (error: any) {
       ElMessage.error(error.message || '登录失败，请重试')
     } finally {
