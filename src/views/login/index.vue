@@ -1,7 +1,12 @@
 <template>
   <div class="login-container">
+    <!-- 粒子动画背景 -->
+    <vue-particles
+      id="tsparticles"
+      :options="particleOptions"
+    />
     <el-card class="login-card">
-      <h2 class="title">系统登录</h2>
+      <h2 class="title">Snap Hutao服务器管理-登录</h2>
 
       <el-form
         ref="loginFormRef"
@@ -49,6 +54,7 @@ import { webLoginApi } from '@/api/auth'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 
+
 // 表单实例
 const loginFormRef = ref<FormInstance>()
 
@@ -86,11 +92,11 @@ const handleLogin = async () => {
     try {
       const response = await webLoginApi(loginForm)
       const userStore = useUserStore()
-      
+
       // 处理响应数据结构
       const tokenData = response.data || response
       userStore.setToken(tokenData.access_token)
-      
+
       // 获取用户信息
       await userStore.fetchUserInfo()
 
@@ -101,9 +107,84 @@ const handleLogin = async () => {
     } finally {
       loading.value = false
     }
-    
+
   })
 }
+
+// 粒子配置选项
+const particleOptions = ref({
+  background: {
+    color: "#0d0d0d"
+  },
+  fpsLimit: 60,
+
+  particles: {
+    number: {
+      value: 200,
+      density: {
+        enable: true,
+        area: 800
+      }
+    },
+
+    color: {
+      value: "#00bcd4"
+    },
+
+    shape: {
+      type: "circle"
+    },
+
+    opacity: {
+      value: 0.6
+    },
+
+    size: {
+      value: 2
+    },
+
+    move: {
+      enable: true,
+      speed: 0.6,
+      direction: "none",
+      outModes: "out"
+    },
+
+    links: {
+      enable: true,
+      distance: 120,
+      color: "#00bcd4",
+      opacity: 0.4,
+      width: 1
+    }
+  },
+
+interactivity: {
+  events: {
+    onHover: {
+      enable: true,
+      mode: "grab"
+    },
+    onClick: {
+      enable: true,
+      mode: "push"
+    }
+  },
+  modes: {
+    grab: {
+      distance: 180,
+      links: {
+        opacity: 0.6
+      }
+    },
+    push: {
+      quantity: 4
+    }
+  }
+},
+  detectRetina: true
+})
+
 </script>
 
 <style scoped>
@@ -117,12 +198,15 @@ const handleLogin = async () => {
 }
 
 .login-card {
-  width: 360px;
+  width: 400px;
   padding: 20px;
+  position: relative;
+  z-index: 10;
 }
 
 .title {
   text-align: center;
   margin-bottom: 20px;
 }
+
 </style>

@@ -9,11 +9,16 @@ const routes = [
   },
   {
     path: '/',
+    component: () => import('@/views/home/index.vue'),
+    meta: { hidden: true }
+  },
+  {
+    path: '/dashboard',
     component: DefaultLayout,
-    redirect: '/dashboard',
+    redirect: '/dashboard/home',
     children: [
       {
-        path: 'dashboard',
+        path: 'home',
         component: () => import('@/views/dashboard/index.vue'),
         meta: { title: '首页', icon: 'House' },
       },

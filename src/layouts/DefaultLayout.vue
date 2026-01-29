@@ -2,8 +2,8 @@
   <el-container class="layout">
     <el-aside :width="isCollapse ? '64px' : '200px'" class="aside">
       <div class="logo" :class="{ collapsed: isCollapse }">
-        <span v-if="!isCollapse">Vite Admin</span>
-        <span v-else>VA</span>
+        <span v-if="!isCollapse">Snap Hutao Web</span>
+        <span v-else></span>
       </div>
 
       <el-menu

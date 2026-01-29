@@ -6,7 +6,8 @@ router.beforeEach(async (to, _ , next) => {
 
   // 未登录
   if (!userStore.token) {
-    if (to.path === '/login') {
+    // 主页（/）允许未登录访问
+    if (to.path === '/' || to.path === '/login') {
       next()
     } else {
       next('/login')
