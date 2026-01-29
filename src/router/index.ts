@@ -9,17 +9,22 @@ const routes = [
   },
   {
     path: '/',
+    component: () => import('@/views/home/index.vue'),
+    meta: { hidden: true }
+  },
+  {
+    path: '/dashboard',
     component: DefaultLayout,
-    redirect: '/dashboard',
+    redirect: '/dashboard/home',
     children: [
       {
-        path: 'dashboard',
+        path: 'home',
         component: () => import('@/views/dashboard/index.vue'),
         meta: { title: '首页', icon: 'House' },
       },
       {
         path: 'user',
-        component: () => import('@/views/dashboard/index.vue'),
+        component: () => import('@/views/user/index.vue'),
         meta: { title: '用户管理', icon: 'User' },
       },
       {
@@ -35,6 +40,11 @@ const routes = [
             path: 'role',
             component: () => import('@/views/dashboard/index.vue'),
             meta: { title: '角色管理', icon: 'UserFilled' },
+          },
+          {
+            path: 'announcement',
+            component: () => import('@/views/announcement/index.vue'),
+            meta: { title: '公告管理', icon: 'Bell' },
           },
         ],
       },
