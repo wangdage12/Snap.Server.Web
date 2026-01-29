@@ -29,6 +29,7 @@ const routes = [
       },
       {
         path: 'system',
+        component: () => import('@/components/RouterViewPlaceholder.vue'),
         meta: { title: '系统管理', icon: 'Setting' },
         children: [
           {

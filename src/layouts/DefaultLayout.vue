@@ -95,9 +95,9 @@ const activeMenu = computed(() => route.path)
  * 获取菜单路由，直接使用配置的路由结构
  */
 const menuRoutes = computed(() => {
-  // 直接返回路由配置中的子路由
-  const mainRoute = router.options.routes.find(r => r.path === '/')
-  return mainRoute?.children || []
+  // 查找 /dashboard 路由的子路由
+  const dashboardRoute = router.options.routes.find(r => r.path === '/dashboard')
+  return dashboardRoute?.children || []
 })
 </script>
 
