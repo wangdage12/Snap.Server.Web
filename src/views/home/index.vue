@@ -90,18 +90,28 @@ const headerActions = ref([
 
 // 主页中心按钮配置
 const heroButtons = ref([
+  // {
+  //   id: 'btn1',
+  //   label: '快速开始',
+  //   type: 'primary',
+  //   size: 'large',
+  //   icon: undefined,
+  //   onClick: () => {
+  //     window.open('https://github.com/wangdage12/Snap.Hutao', '_blank')
+  //   }
+  // },
   {
-    id: 'btn1',
-    label: '快速开始',
+    id: 'btn2',
+    label: '立即下载',
     type: 'primary',
     size: 'large',
     icon: undefined,
     onClick: () => {
-      window.open('https://github.com/wangdage12/Snap.Hutao', '_blank')
+      router.push('/download')
     }
   },
   {
-    id: 'btn2',
+    id: 'btn3',
     label: '查看文档',
     type: 'default',
     size: 'large',

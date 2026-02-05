@@ -2,13 +2,13 @@ import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 
-const request = axios.create({
+const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
 })
 
 /** 请求拦截：自动加 Token */
-request.interceptors.request.use((config) => {
+axiosInstance.interceptors.request.use((config: any) => {
   const userStore = useUserStore()
   if (userStore.token) {
     config.headers = config.headers || {}
@@ -18,8 +18,8 @@ request.interceptors.request.use((config) => {
 })
 
 /** 响应拦截：兼容 code / retcode */
-request.interceptors.response.use(
-  (response) => {
+axiosInstance.interceptors.response.use(
+  (response: any) => {
     const res = response.data
 
     // 登录接口：code
@@ -43,24 +43,24 @@ request.interceptors.response.use(
     // 兜底
     return res
   },
-  (error) => {
+  (error: any) => {
     // 处理401未授权错误
     if (error.response?.status === 401) {
       const userStore = useUserStore()
       userStore.logout()
-      
+
       // 如果不在登录页，则跳转到登录页
       if (window.location.pathname !== '/login') {
         window.location.href = '/login'
       }
-      
+
       ElMessage.error('登录已过期，请重新登录')
       return Promise.reject(new Error('登录已过期'))
     }
-    
+
     ElMessage.error(error.message || '网络错误')
     return Promise.reject(error)
   }
 )
 
-export default request
+export default axiosInstance
