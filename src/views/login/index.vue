@@ -94,7 +94,7 @@ const handleLogin = async () => {
       const userStore = useUserStore()
 
       // 处理响应数据结构
-      const tokenData = response.data || response
+      const tokenData = response as any
       userStore.setToken(tokenData.access_token)
 
       // 获取用户信息

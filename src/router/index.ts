@@ -13,6 +13,11 @@ const routes = [
     meta: { hidden: true }
   },
   {
+    path: '/download',
+    component: () => import('@/views/download/index.vue'),
+    meta: { hidden: true }
+  },
+  {
     path: '/dashboard',
     component: DefaultLayout,
     redirect: '/dashboard/home',
@@ -46,6 +51,11 @@ const routes = [
             path: 'announcement',
             component: () => import('@/views/announcement/index.vue'),
             meta: { title: '公告管理', icon: 'Bell' },
+          },
+          {
+            path: 'download-manager',
+            component: () => import('@/views/download-manager/index.vue'),
+            meta: { title: '下载资源管理', icon: 'Download' },
           },
         ],
       },
