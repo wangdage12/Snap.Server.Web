@@ -229,7 +229,12 @@ function downloadFile(item: VersionInfo, packageType: 'msi' | 'msix') {
 
   const a = document.createElement('a')
   a.href = downloadUrl
-  a.download = `Snap.Hutao.${item.version}.${packageType}`
+  // 如果是msix的话，文件是用zip格式压缩的
+  if (packageType === 'msix') {
+    a.download = `Snap.Hutao.${item.version}.zip`
+  } else {
+    a.download = `Snap.Hutao.${item.version}.msi`
+  }
   a.target = '_blank'
   document.body.appendChild(a)
   a.click()
