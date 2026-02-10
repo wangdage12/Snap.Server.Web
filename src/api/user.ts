@@ -44,14 +44,22 @@ export function getUserInfoApi(): Promise<UserInfo> {
 /**
  * 获取用户列表
  * GET /web-api/users
- * @param q 搜索参数，可搜索用户名、邮箱、_id
+ * @param params 搜索和筛选参数
+ * @param params.q 搜索关键词，可搜索用户名、邮箱、_id
+ * @param params.role 按角色筛选：maintainer, developer, user
+ * @param params.email 按邮箱筛选
+ * @param params.username 按用户名筛选
+ * @param params.id 按用户ID筛选
+ * @param params.is 按状态筛选：licensed, not-licensed
  */
-export function getUserListApi(q?: string): Promise<UserListItem[]> {
-  const params: Record<string, any> = {}
-  if (q) {
-    params.q = q
-  }
-  
+export function getUserListApi(params?: {
+  q?: string
+  role?: string
+  email?: string
+  username?: string
+  id?: string
+  is?: string
+}): Promise<UserListItem[]> {
   return request({
     url: '/web-api/users',
     method: 'get',

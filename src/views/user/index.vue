@@ -2,28 +2,27 @@
   <div class="user-management">
     <!-- 搜索栏和用户统计并排 -->
     <div class="search-statistics-row">
-<!-- 搜索栏 -->
-    <el-form :inline="true" :model="searchForm" class="search-form">
-      <el-form-item label="关键词">
-        <el-input 
-          v-model="searchForm.keyword" 
-          placeholder="请输入用户名、邮箱或ID" 
-          clearable 
-          @keyup.enter="handleSearch"
+      <!-- GitHub样式搜索框 -->
+      <div class="search-container">
+        <GitHubSearchInput
+          ref="githubSearch"
+          v-model="searchQuery"
+          placeholder="搜索用户... 例如: role:developer username:test"
+          @search="handleGitHubSearch"
         />
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="handleSearch" :loading="loading">搜索</el-button>
-        <el-button @click="handleReset">重置</el-button>
-      </el-form-item>
-    </el-form>
-<!-- 用户统计 -->
-    <div class="statistics" v-if="!loading && displayUserList.length > 0">
-      <el-statistic title="当前显示用户数" :value="displayUserList.length" />
-      <el-statistic title="运维人员" :value="maintainerCount" />
-      <el-statistic title="开发者" :value="developerCount" />
-      <el-statistic v-if="isSearchMode" title="搜索模式" value="进行中" />
-    </div>
+        <div class="search-actions">
+          <el-button type="primary" @click="executeSearch" :loading="loading">搜索</el-button>
+          <el-button @click="handleReset">重置</el-button>
+        </div>
+      </div>
+
+      <!-- 用户统计 -->
+      <div class="statistics" v-if="!loading && displayUserList.length > 0">
+        <el-statistic title="当前显示用户数" :value="displayUserList.length" />
+        <el-statistic title="运维人员" :value="maintainerCount" />
+        <el-statistic title="开发者" :value="developerCount" />
+        <el-statistic v-if="isSearchMode" title="搜索模式" value="进行中" />
+      </div>
     </div>
 
     <!-- 操作按钮 -->
@@ -67,45 +66,41 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import GitHubSearchInput from '@/components/GitHubSearchInput.vue'
 import { getUserListApi, type UserListItem } from '@/api/user'
 
-interface SearchForm {
-  keyword: string
-}
-
-const searchForm = reactive<SearchForm>({
-  keyword: ''
-})
-
+const githubSearch = ref<InstanceType<typeof GitHubSearchInput>>()
+const searchQuery = ref('')
+const currentFilters = ref<Record<string, string>>({})
 const userList = ref<UserListItem[]>([])
 const loading = ref(false)
 const isSearchMode = ref(false)
 
-// 显示的用户列表（根据是否在搜索模式决定显示全部还是搜索结果）
+// 显示的用户列表（直接使用后端返回的数据）
 const displayUserList = computed(() => {
   return userList.value
 })
 
-// 统计数据
-const maintainerCount = computed(() => 
-  userList.value.filter(user => user.IsMaintainer).length
+// 统计数据（基于当前显示的列表）
+const maintainerCount = computed(() =>
+  displayUserList.value.filter(user => user.IsMaintainer).length
 )
 
-const developerCount = computed(() => 
-  userList.value.filter(user => user.IsLicensedDeveloper).length
+const developerCount = computed(() =>
+  displayUserList.value.filter(user => user.IsLicensedDeveloper).length
 )
 
 // 获取用户列表
-async function fetchUserList(searchKeyword?: string) {
+async function fetchUserList(filters?: Record<string, string>) {
   loading.value = true
   try {
-    const data = await getUserListApi(searchKeyword)
+    const data = await getUserListApi(filters)
     userList.value = data
-    
-    if (searchKeyword) {
-      ElMessage.success(`搜索完成，找到 ${data.length} 个匹配的用户`)
+
+    if (filters && Object.keys(filters).length > 0) {
+      ElMessage.success(`找到 ${data.length} 个匹配的用户`)
       isSearchMode.value = true
     } else {
       ElMessage.success('用户列表加载成功')
@@ -120,39 +115,36 @@ async function fetchUserList(searchKeyword?: string) {
   }
 }
 
-function handleSearch() {
-  if (!searchForm.keyword.trim()) {
-    ElMessage.warning('请输入搜索关键词')
-    return
+// 处理GitHub搜索
+function handleGitHubSearch(_query: string, filters: Record<string, string>) {
+  currentFilters.value = filters
+  fetchUserList(filters)
+}
+
+// 执行搜索（通过搜索框）
+function executeSearch() {
+  if (githubSearch.value) {
+    githubSearch.value.handleSearch()
+  } else {
+    handleGitHubSearch(searchQuery.value, currentFilters.value)
   }
-  fetchUserList(searchForm.keyword.trim())
 }
 
+// 重置搜索
 function handleReset() {
-  searchForm.keyword = ''
-  isSearchMode.value = false
-  fetchUserList() // 重新获取全部用户列表
+  searchQuery.value = ''
+  currentFilters.value = {}
+  fetchUserList()
 }
 
+// 刷新列表
 function handleRefresh() {
-  if (isSearchMode.value && searchForm.keyword) {
-    fetchUserList(searchForm.keyword)
+  if (isSearchMode.value && Object.keys(currentFilters.value).length > 0) {
+    fetchUserList(currentFilters.value)
   } else {
     fetchUserList()
   }
 }
-
-// function handleAdd() {
-//   ElMessage.info('新增用户功能待实现')
-// }
-
-// function handleEdit(row: UserListItem) {
-//   ElMessage.info(`编辑用户 ${row.UserName} 功能待实现`)
-// }
-
-// function handleDelete(row: UserListItem) {
-//   ElMessage.info(`删除用户 ${row.UserName} 功能待实现`)
-// }
 
 // 页面加载时获取用户列表
 onMounted(() => {
@@ -164,25 +156,58 @@ onMounted(() => {
 .user-management {
   padding: 24px;
 }
-/* 新增flex布局 */
+
 .search-statistics-row {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 16px;
+  gap: 24px;
 }
-.search-form {
-  /* 保持原有样式，可根据需要调整宽度 */
-  margin-bottom: 0;
+
+.search-container {
+  width: 600px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-container :deep(.github-search-container) {
   flex: 1;
+  min-width: 0;
 }
+
+.search-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .statistics {
-  margin-left: 32px;
   display: flex;
   gap: 24px;
-  margin-top: 0;
+  flex-shrink: 0;
 }
+
 .toolbar {
   margin-bottom: 16px;
+}
+
+/* 响应式调整 */
+@media (max-width: 1200px) {
+  .search-statistics-row {
+    flex-direction: column;
+  }
+
+  .search-container {
+    width: 100%;
+  }
+
+  .statistics {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
 }
 </style>
