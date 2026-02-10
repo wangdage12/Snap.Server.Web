@@ -10,6 +10,7 @@ export interface DownloadResource {
   file_hash: string | null
   file_size: string | null
   is_active: boolean | null
+  is_test?: boolean
   package_type: string
   version: string
 }
@@ -33,6 +34,20 @@ export function getLatestVersionApi(): Promise<DownloadResource> {
   return request({
     url: '/download-resources/latest',
     method: 'get',
+  })
+}
+
+/**
+ * 获取测试版本
+ * GET /download-resources?is_test=true
+ */
+export function getTestVersionApi(): Promise<DownloadResource[]> {
+  return request({
+    url: '/download-resources',
+    method: 'get',
+    params: {
+      is_test: true
+    }
   })
 }
 
@@ -86,6 +101,7 @@ export interface CreateResourceRequest {
   file_size?: string | null
   file_hash?: string | null
   is_active?: boolean | null
+  is_test?: boolean
 }
 
 /** 创建资源响应数据类型 */

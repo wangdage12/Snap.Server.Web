@@ -13,12 +13,51 @@
           下载中心
         </h1>
         <p class="section-description">选择适合您的安装包，立即开始使用 Snap Hutao<br>系统要求：新版本Windows10及Windows11</p>
+
+        <!-- 版本类型切换 -->
+        <div class="version-tabs">
+          <el-tabs v-model="versionType" @tab-change="switchVersionType">
+            <el-tab-pane label="正式版" name="stable">
+              <template #label>
+                <span class="tab-label">
+                  <el-icon><Document /></el-icon>
+                  正式版
+                </span>
+              </template>
+            </el-tab-pane>
+            <el-tab-pane label="测试版" name="test">
+              <template #label>
+                <span class="tab-label">
+                  <el-icon><Box /></el-icon>
+                  测试版
+                </span>
+              </template>
+            </el-tab-pane>
+          </el-tabs>
+
+          <!-- 测试版警告提示 -->
+          <el-alert
+            v-if="versionType === 'test'"
+            title="测试版说明"
+            type="warning"
+            :closable="false"
+            show-icon
+          >
+            <p>测试版可能存在未知的 Bug 和稳定性问题，仅供测试和体验新功能使用。如需稳定使用，请下载正式版。</p>
+          </el-alert>
+        </div>
         
 
         <!-- 最新版本下载区域 -->
         <div v-if="latestVersion" class="latest-version-card">
           <div class="latest-header">
-            <el-tag type="success" size="large" effect="dark">最新版本</el-tag>
+            <el-tag
+              :type="versionType === 'test' ? 'warning' : 'success'"
+              size="large"
+              effect="dark"
+            >
+              {{ versionType === 'test' ? '最新测试版本' : '最新版本' }}
+            </el-tag>
             <h2 class="version-title">{{ latestVersion.version }}</h2>
           </div>
 
@@ -70,16 +109,18 @@
           </div>
         </div>
 
-        <el-divider>历史版本</el-divider>
+        <!-- 历史版本列表（仅正式版显示） -->
+        <el-divider v-if="versionType === 'stable'">历史版本</el-divider>
 
-        <!-- 历史版本列表 -->
         <div v-loading="loading" class="history-list">
-          <div v-if="historyVersions.length === 0 && !loading" class="empty-state">
+          <!-- 正式版：显示历史版本空状态 -->
+          <div v-if="versionType === 'stable' && historyVersions.length === 0 && !loading" class="empty-state">
             <el-icon><FolderOpened /></el-icon>
             <p>暂无历史版本</p>
           </div>
 
-          <div v-else class="version-table">
+          <!-- 正式版：显示历史版本列表 -->
+          <div v-else-if="versionType === 'stable' && historyVersions.length > 0" class="version-table">
             <div
               v-for="(item, index) in historyVersions"
               :key="index"
@@ -129,6 +170,12 @@
               </div>
             </div>
           </div>
+
+          <!-- 测试版：显示空状态 -->
+          <div v-if="versionType === 'test' && !latestVersion && !loading" class="empty-state">
+            <el-icon><FolderOpened /></el-icon>
+            <p>暂无测试版本</p>
+          </div>
         </div>
       </div>
     </div>
@@ -147,7 +194,7 @@ import {
   FolderOpened,
 } from '@element-plus/icons-vue'
 import Header from '@/components/Header.vue'
-import { getDownloadResourcesApi } from '@/api/download'
+import { getDownloadResourcesApi, getTestVersionApi } from '@/api/download'
 
 const router = useRouter()
 
@@ -200,6 +247,7 @@ const latestVersion = ref<VersionInfo | null>(null)
 const historyVersions = ref<VersionInfo[]>([])
 const loading = ref(false)
 const downloading = ref(false)
+const versionType = ref<'stable' | 'test'>('stable')
 
 /**
  * 格式化日期
@@ -261,7 +309,7 @@ function getTooltipText(item: VersionInfo, packageType: 'msi' | 'msix') {
 }
 
 /**
- * 加载所有版本
+ * 加载正式版本
  */
 async function loadAllVersions() {
   try {
@@ -324,6 +372,91 @@ async function loadAllVersions() {
   }
 }
 
+/**
+ * 加载测试版本
+ */
+async function loadTestVersion() {
+  try {
+    loading.value = true
+    const data = await getTestVersionApi()
+    if (!data || data.length === 0) {
+      latestVersion.value = null
+      historyVersions.value = []
+      return
+    }
+
+    // 按版本号分组
+    const versionMap = new Map<string, VersionInfo>()
+
+    data.forEach((item) => {
+      if (!versionMap.has(item.version)) {
+        // 首次遇到该版本，创建新记录
+        versionMap.set(item.version, {
+          version: item.version,
+          created_at: item.created_at,
+          created_by: item.created_by,
+          features: item.features,
+          file_hash: item.file_hash,
+          file_size: item.file_size,
+          is_active: item.is_active,
+          packages: {
+            msi: null,
+            msix: null,
+            msi_size: null,
+            msix_size: null,
+          },
+        })
+      }
+
+      // 添加包类型的下载链接和大小
+      const versionInfo = versionMap.get(item.version)
+      if (versionInfo) {
+        if (item.package_type === 'msi') {
+          versionInfo.packages.msi = item.download_url
+          versionInfo.packages.msi_size = item.file_size
+        } else if (item.package_type === 'msix') {
+          versionInfo.packages.msix = item.download_url
+          versionInfo.packages.msix_size = item.file_size
+        }
+      }
+    })
+
+    // 转换为数组并按创建时间倒序排序
+    const versions = Array.from(versionMap.values()).sort((a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )
+
+    if (versions.length > 0) {
+      latestVersion.value = versions[0] ?? null
+      // 测试版本只显示最新版本，不显示历史版本
+      historyVersions.value = []
+    } else {
+      latestVersion.value = null
+      historyVersions.value = []
+    }
+  } catch (error) {
+    console.error('加载测试版本失败:', error)
+    ElMessage.error('加载测试版本失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+/**
+ * 切换版本类型
+ */
+function switchVersionType(type: 'stable' | 'test') {
+  versionType.value = type
+  latestVersion.value = null
+  historyVersions.value = []
+
+  if (type === 'stable') {
+    loadAllVersions()
+  } else {
+    loadTestVersion()
+  }
+}
+
 onMounted(() => {
   loadAllVersions()
 })
@@ -365,7 +498,42 @@ onMounted(() => {
   font-size: 16px;
   color: var(--text-color);
   opacity: 0.8;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+/* 版本类型切换 */
+.version-tabs {
+  margin-bottom: 32px;
+}
+
+.version-tabs :deep(.el-tabs__header) {
+  margin: 0;
+}
+
+.version-tabs :deep(.el-tabs__nav-wrap::after) {
+  display: none;
+}
+
+.version-tabs :deep(.el-tabs__item) {
+  font-size: 16px;
+  padding: 0 24px;
+}
+
+.version-tabs .tab-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.version-tabs :deep(.el-alert) {
+  margin-top: 16px;
+  padding: 12px 16px;
+}
+
+.version-tabs :deep(.el-alert__description) {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 /* 最新版本卡片 */
