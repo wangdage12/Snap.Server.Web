@@ -231,6 +231,14 @@
           />
         </el-form-item>
 
+        <el-form-item label="测试版">
+          <el-switch
+            v-model="createForm.is_test"
+            active-text="是"
+            inactive-text="否"
+          />
+        </el-form-item>
+
         <el-form-item label="新功能描述">
           <el-input
             v-model="createForm.features"
@@ -314,6 +322,14 @@
           />
         </el-form-item>
 
+        <el-form-item label="测试版">
+          <el-switch
+            v-model="editForm.is_test"
+            active-text="是"
+            inactive-text="否"
+          />
+        </el-form-item>
+
         <el-form-item label="新功能描述">
           <el-input
             v-model="editForm.features"
@@ -380,6 +396,7 @@ const createForm = reactive<CreateResourceRequest>({
   file_size: '',
   file_hash: '',
   is_active: true,
+  is_test: false,
 })
 
 const createRules: FormRules = {
@@ -410,6 +427,7 @@ const editForm = reactive<CreateResourceRequest>({
   file_size: '',
   file_hash: '',
   is_active: true,
+  is_test: false,
 })
 
 const editRules: FormRules = {
@@ -499,6 +517,7 @@ function handleCreate() {
     file_size: '',
     file_hash: '',
     is_active: true,
+    is_test: false,
   })
   createDialogVisible.value = true
 }
@@ -543,6 +562,7 @@ function handleEdit(resource: DownloadResource) {
     file_size: resource.file_size || '',
     file_hash: resource.file_hash || '',
     is_active: resource.is_active ?? true,
+    is_test: resource.is_test ?? false,
   })
   editDialogVisible.value = true
 }
