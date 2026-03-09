@@ -1,6 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 
+/**
+ * 路由元信息说明：
+ * - hidden: 是否在菜单中隐藏
+ * - title: 菜单标题
+ * - icon: 菜单图标
+ * - requiresFullAdmin: 是否需要完整管理员权限（IsMaintainer && IsLicensedDeveloper）
+ */
 const routes = [
   {
     path: '/login',
@@ -30,7 +37,12 @@ const routes = [
       {
         path: 'user',
         component: () => import('@/views/user/index.vue'),
-        meta: { title: '用户管理', icon: 'User' },
+        meta: { title: '用户管理', icon: 'User', requiresFullAdmin: true },
+      },
+      {
+        path: 'gacha-log',
+        component: () => import('@/views/gacha-log/index.vue'),
+        meta: { title: '祈愿记录', icon: 'TrendCharts' },
       },
       {
         path: 'system',
@@ -40,12 +52,12 @@ const routes = [
           {
             path: 'menu',
             component: () => import('@/views/dashboard/index.vue'),
-            meta: { title: '菜单管理', icon: 'Menu' },
+            meta: { title: '菜单管理', icon: 'Menu', requiresFullAdmin: true },
           },
           {
             path: 'role',
             component: () => import('@/views/dashboard/index.vue'),
-            meta: { title: '角色管理', icon: 'UserFilled' },
+            meta: { title: '角色管理', icon: 'UserFilled', requiresFullAdmin: true },
           },
           {
             path: 'announcement',

@@ -91,13 +91,50 @@ const toggle = () => (isCollapse.value = !isCollapse.value)
 
 const activeMenu = computed(() => route.path)
 
+
+// 根据用户权限过滤菜单路由
 /**
- * 获取菜单路由，直接使用配置的路由结构
+ * 检查用户是否具有完整管理员权限
+ */
+const hasFullAdminPermission = computed(() => {
+  const userInfo = userStore.userInfo
+  return userInfo?.IsMaintainer === true && userInfo?.IsLicensedDeveloper === true
+})
+
+/**
+ * 递归过滤路由，移除没有权限的菜单项
+ */
+const filterRoutesByPermission = (routes: any[]): any[] => {
+  return routes
+    .filter(route => {
+      // 如果路由需要完整管理员权限，检查用户是否有权限
+      if (route.meta?.requiresFullAdmin && !hasFullAdminPermission.value) {
+        return false
+      }
+      return true
+    })
+    .map(route => {
+      // 如果有子路由，递归过滤
+      if (route.children && route.children.length > 0) {
+        const filteredChildren = filterRoutesByPermission(route.children)
+        if (filteredChildren.length === 0 && route.component?.name === 'RouterViewPlaceholder') {
+          return null
+        }
+        return { ...route, children: filteredChildren }
+      }
+      return route
+    })
+    .filter(route => route !== null)
+}
+
+/**
+ * 获取菜单路由，根据权限过滤
  */
 const menuRoutes = computed(() => {
   // 查找 /dashboard 路由的子路由
   const dashboardRoute = router.options.routes.find(r => r.path === '/dashboard')
-  return dashboardRoute?.children || []
+  const children = dashboardRoute?.children || []
+  return filterRoutesByPermission(children)
 })
 </script>
 
