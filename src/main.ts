@@ -22,7 +22,7 @@ Sentry.init({
   // Setting this option to true will send default PII data to Sentry.
   // For example, automatic IP address collection on events
   sendDefaultPii: true,
-  integrations: [Sentry.browserTracingIntegration()],
+  integrations: [Sentry.browserTracingIntegration({ router })],
   tracesSampleRate: 0.2,
   tracePropagationTargets: ["localhost", "https://htserver.wdg.cloudns.ch/"],
   // Session Replay
